@@ -32,9 +32,33 @@ jobs:
           cache: gradle
 
       # 3. Siapkan Android SDK
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+    
+      - name: Configure Android SDK
+        shell: bash
+        run: |
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
+          echo "/usr/local/lib/android/sdk/platform-tools" >> "$GITHUB_PATH"
 
+      - name: Install Android SDK 36
+        shell: bash
+        run: |
+          set -e
+
+          SDKMANAGER=$(find /usr/local/lib/android/sdk/cmdline-tools \
+            -type f -name sdkmanager 2>/dev/null | head -n 1)
+
+          if [ -z "$SDKMANAGER" ]; then
+            echo "ERROR: sdkmanager tidak ditemukan"
+            exit 1
+          fi
+
+          yes | "$SDKMANAGER" --licenses || true
+
+          "$SDKMANAGER" --install \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.0.0"
       # 4. Instal Android SDK 36
       - name: Install Android SDK 36
         run: |
